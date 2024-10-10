@@ -54,14 +54,16 @@ public:
         auto hit = hash_.find (key);
 
         key_list.pop_front ();
+
         sequency_map[key].pop_front ();
 
         if (hit == hash_.end ())
         {
+            if (sequency_map[key].empty ())
+                return false;
+
             if (full())
-            {
                 delete_latest_element ();
-            }
 
             add_new_element (key, slow_get_page (key));
             return false;
@@ -69,3 +71,8 @@ public:
         return true;
     }
 };
+
+// TODO: Достали первый элемент списка, ищем его в хэше, удаляем первую встречу элемента в списке
+//       Если нет в хэше - если полный - удаляем тот, который встретится не скоро
+//       Затем - добавляем элемент
+//       Если есть в хэше -
