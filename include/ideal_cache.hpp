@@ -24,6 +24,12 @@ class IdealCache
         KeyT key = 0;
         for (hash_it it = hash_.begin (); it != hash_.end (); it++)
         {
+            if (sequency_map[it->first].empty ())
+            {
+                key = it->first;
+                break;
+            }
+
             if (!sequency_map[it->first].empty () &&
                  sequency_map[it->first].front () > latest_appear)
             {
