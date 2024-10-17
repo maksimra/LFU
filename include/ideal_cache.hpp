@@ -54,6 +54,11 @@ public:
 
     using hash_it = typename std::unordered_map<KeyT, PageT>::iterator;
 
+    PageT get_element (KeyT key)
+    {
+        return hash_[key];
+    }
+
     bool lookup_update (PageT (*slow_get_page) (KeyT key))
     {
         KeyT key = key_list.front ();

@@ -5,10 +5,16 @@
 #include "../include/ideal_cache.hpp"
 #include "../include/get_page.hpp"
 
+const size_t STANDART_CACHE_SIZE = 6;
+
 size_t lfu_test (const char* filename)
 {
     std::fstream test_file (filename);
-    std::cin.rdbuf (test_file.rdbuf ());
+    if (!test_file.is_open ())
+    {
+        throw std::runtime_error ("Не удалось открыть файл " + std::string (filename));
+    }
+    auto original_buffer = std::cin.rdbuf(test_file.rdbuf());
 
     size_t cache_capacity = 0, number_pages = 0;
     std::cin >> cache_capacity >> number_pages;
@@ -30,13 +36,18 @@ size_t lfu_test (const char* filename)
             num_hits += 1;
     }
 
+    std::cin.rdbuf(original_buffer);
     return num_hits;
 }
 
 size_t ideal_test (const char* filename)
 {
     std::fstream test_file (filename);
-    std::cin.rdbuf (test_file.rdbuf ());
+    if (!test_file.is_open ())
+    {
+        throw std::runtime_error ("Не удалось открыть файл " + std::string (filename));
+    }
+    auto original_buffer = std::cin.rdbuf(test_file.rdbuf());
 
     size_t cache_capacity = 0, number_pages = 0;
     std::cin >> cache_capacity >> number_pages;
@@ -66,6 +77,7 @@ size_t ideal_test (const char* filename)
             num_hits += 1;
     }
 
+    std::cin.rdbuf(original_buffer);
     return num_hits;
 }
 
@@ -86,7 +98,64 @@ size_t get_answer (size_t test_number, const char* filename)
     return answers[test_number - 1];
 }
 
-TEST(CacheTest, Test_1)
+TEST (LfuUnitTest, CacheEviction)
+{
+    LFUCache<PageInfo> lfu_cache (2);
+    int keys[4] = {10, 10, 20, 30};
+
+    for (int element_num = 0; element_num < 4; ++element_num)
+    {
+        lfu_cache.lookup_update (keys[element_num], slow_get_page);
+    }
+
+    EXPECT_EQ (lfu_cache.element_exists (20), false);
+}
+
+TEST (LfuUnitTest, CacheInsertDelete)
+{
+    LFUCache<PageInfo> lfu_cache (STANDART_CACHE_SIZE);
+    int key = 17156;
+
+    lfu_cache.lookup_update (key, slow_get_page);
+    EXPECT_EQ (lfu_cache.hash_[key]->key_, key);
+
+    lfu_cache.delete_cache_element ();
+    EXPECT_EQ (lfu_cache.element_exists (key), false);
+}
+
+TEST (LfuUnitTest, CacheMiss)
+{
+    LFUCache<PageInfo> lfu_cache (STANDART_CACHE_SIZE);
+    int key = 1999;
+
+    EXPECT_EQ (lfu_cache.element_exists (key), false);
+}
+
+TEST (IdealUnitTest, SetAndGet)
+{
+    IdealCache<PageInfo> ideal_cache (STANDART_CACHE_SIZE);
+    int key = 2005;
+
+    ideal_cache.key_list.push_back (key);
+
+    ideal_cache.sequency_map[key].push_back (1);
+    ideal_cache.sequency_map[key].push_back (2);
+
+    ideal_cache.lookup_update (slow_get_page);
+    EXPECT_EQ (ideal_cache.get_element (key).key, key);
+}
+
+TEST (LfuUnitTest, SetAndGet)
+{
+    LFUCache<PageInfo> lfu_cache (STANDART_CACHE_SIZE);
+    int key = 8800;
+
+    lfu_cache.lookup_update (key, slow_get_page);
+
+    EXPECT_EQ (lfu_cache.hash_[key]->key_, key);
+}
+
+TEST (EndToEndTest, Test_1)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/1test.txt");
     size_t number_hits_ideal = ideal_test ("tests/1test.txt");
@@ -97,7 +166,7 @@ TEST(CacheTest, Test_1)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_2)
+TEST (EndToEndTest, Test_2)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/2test.txt");
     size_t number_hits_ideal = ideal_test ("tests/2test.txt");
@@ -108,7 +177,7 @@ TEST(CacheTest, Test_2)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_3)
+TEST (EndToEndTest, Test_3)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/3test.txt");
     size_t number_hits_ideal = ideal_test ("tests/3test.txt");
@@ -119,7 +188,7 @@ TEST(CacheTest, Test_3)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_4)
+TEST (EndToEndTest, Test_4)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/4test.txt");
     size_t number_hits_ideal = ideal_test ("tests/4test.txt");
@@ -130,7 +199,7 @@ TEST(CacheTest, Test_4)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_5)
+TEST (EndToEndTest, Test_5)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/5test.txt");
     size_t number_hits_ideal = ideal_test ("tests/5test.txt");
@@ -141,7 +210,7 @@ TEST(CacheTest, Test_5)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_6)
+TEST (EndToEndTest, Test_6)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/6test.txt");
     size_t number_hits_ideal = ideal_test ("tests/6test.txt");
@@ -152,7 +221,7 @@ TEST(CacheTest, Test_6)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_7)
+TEST (EndToEndTest, Test_7)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/7test.txt");
     size_t number_hits_ideal = ideal_test ("tests/7test.txt");
@@ -163,7 +232,7 @@ TEST(CacheTest, Test_7)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_8)
+TEST (EndToEndTest, Test_8)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/8test.txt");
     size_t number_hits_ideal = ideal_test ("tests/8test.txt");
@@ -174,7 +243,7 @@ TEST(CacheTest, Test_8)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_9)
+TEST (EndToEndTest, Test_9)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/9test.txt");
     size_t number_hits_ideal = ideal_test ("tests/9test.txt");
@@ -185,7 +254,7 @@ TEST(CacheTest, Test_9)
     std::cout << "Ideal: number hits   = " << number_hits_ideal << "\n";
 }
 
-TEST(CacheTest, Test_10)
+TEST (EndToEndTest, Test_10)
 {
     size_t number_hits_lfu   = lfu_test   ("tests/10test.txt");
     size_t number_hits_ideal = ideal_test ("tests/10test.txt");

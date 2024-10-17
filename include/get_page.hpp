@@ -2,7 +2,7 @@
 
 struct PageInfo
 {
-    int index;
+    int key;
     int size;
     const char* data;
 };

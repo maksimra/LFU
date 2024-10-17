@@ -51,24 +51,32 @@ class LFUCache
         hash_[key] = freq_list_.begin ()->pages_.begin ();
     }
 
-    void delete_cache_element ()
-    {
-        hash_.erase (freq_list_.begin()->pages_.back ().key_);
-        freq_list_.begin ()->pages_.pop_back ();
-    }
 
     void update_cache_list (cache_node_it cache_node_it)
     {
         cache_node_it->freq_it_->frequency_ += 1;
     }
 
+    bool full () const
+    {
+        return (hash_.size () >= cache_sz_);
+    }
+
 public:
     LFUCache (size_t cache_size): cache_sz_ (cache_size) {}
     std::unordered_map<KeyT, cache_node_it> hash_;
 
-    bool full () const
+    void delete_cache_element ()
     {
-        return (hash_.size () >= cache_sz_);
+        hash_.erase (freq_list_.begin()->pages_.back ().key_);
+        freq_list_.begin ()->pages_.pop_back ();
+    }
+    
+    bool element_exists (KeyT key)
+    {
+        if (hash_.find (key) != hash_.end ())
+            return true;
+        return false;
     }
 
     bool lookup_update (KeyT key, PageT (*slow_get_page) (KeyT key))
