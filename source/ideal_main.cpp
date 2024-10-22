@@ -2,33 +2,47 @@
 #include <iostream>
 #include <cassert>
 #include "../include/get_page.hpp"
+#include "../include/getting_value.hpp"
 
 int main ()
 {
-    size_t cache_capacity = 0;
-    std::cin >> cache_capacity;
+    int cache_capacity = 0;
+    int num_elements   = 0;
 
-    size_t num_elements = 0;
-    std::cin >> num_elements;
+    try
+    {
+        get_positive_val_from_cin (&cache_capacity);
+        get_positive_val_from_cin (&num_elements);
+    }
+    catch (const char* error_message)
+    {
+        std::cerr << error_message;
+        return 0;
+    }
 
     IdealCache<PageInfo> cache (cache_capacity);
+    int key = 0;
 
-    for (size_t element_num = 0;
+    for (int element_num = 0;
          element_num < num_elements;
          element_num++)
     {
-        int key = 0;
-        std::cin >> key;
+        try
+        {
+            get_smth_from_cin (&key);
+        }
+        catch (const char* error_message)
+        {
+            std::cerr << error_message;
+            return 0;
+        }
 
-        assert (std::cin.good ());
-
-        cache.key_list.push_back (key);
-        cache.sequency_map[key].push_back (element_num);
+        cache.put_elem (element_num, key);
     }
 
     size_t num_hits = 0;
 
-    for (size_t element_num = 0;
+    for (int element_num = 0;
          element_num < num_elements;
          element_num++)
     {
@@ -37,4 +51,5 @@ int main ()
     }
 
     std::cout << num_hits << "\n";
+    return 0;
 }

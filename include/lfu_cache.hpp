@@ -22,27 +22,22 @@ class LFUCache
         KeyT key_;
         PageT page_;
         freq_it freq_it_;
-
-        CacheNode (KeyT key, PageT page, freq_it freq_it):
-                   key_ (key), page_ (page), freq_it_ (freq_it) {}
     };
 
     struct FreqNode
     {
-        size_t frequency_ = 0;
+        size_t frequency_ = 1;
         std::list<CacheNode> pages_ = {};
-
-        FreqNode (size_t frequency):
-                  frequency_ (frequency) {}
     };
 
     std::list<FreqNode> freq_list_ = {};
+    std::unordered_map<KeyT, cache_node_it> hash_;
 
     void add_new_element (KeyT key, PageT page)
     {
         if (freq_list_.begin ()->frequency_ != 1)
         {
-            FreqNode freq_node (1);
+            FreqNode freq_node;
             freq_list_.push_front (freq_node);
         }
 
@@ -51,6 +46,11 @@ class LFUCache
         hash_[key] = freq_list_.begin ()->pages_.begin ();
     }
 
+    void delete_cache_element ()
+    {
+        hash_.erase (freq_list_.begin()->pages_.back ().key_);
+        freq_list_.begin ()->pages_.pop_back ();
+    }
 
     void update_cache_list (cache_node_it cache_node_it)
     {
@@ -64,14 +64,12 @@ class LFUCache
 
 public:
     LFUCache (size_t cache_size): cache_sz_ (cache_size) {}
-    std::unordered_map<KeyT, cache_node_it> hash_;
 
-    void delete_cache_element ()
+    cache_node_it get_hash_value (KeyT key)
     {
-        hash_.erase (freq_list_.begin()->pages_.back ().key_);
-        freq_list_.begin ()->pages_.pop_back ();
+        return hash_[key];
     }
-    
+
     bool element_exists (KeyT key)
     {
         if (hash_.find (key) != hash_.end ())
@@ -79,7 +77,8 @@ public:
         return false;
     }
 
-    bool lookup_update (KeyT key, PageT (*slow_get_page) (KeyT key))
+    template <typename F>
+    bool lookup_update (KeyT key, F slow_get_page)
     {
         auto hit = hash_.find (key);
 
