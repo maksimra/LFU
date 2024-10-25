@@ -74,7 +74,7 @@ public:
     {
         if (hash_.find (key) != hash_.end ())
             return true;
-        return false;
+        return false; //
     }
 
     template <typename F>
