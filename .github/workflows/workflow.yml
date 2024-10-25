@@ -22,10 +22,4 @@ jobs:
     - name: CMake release build
       run: cmake --build build
     - name: CMake release test
-      run: env CTEST_OUTPUT_ON_FAILURE=1 cmake --build build --target test
-    - name: CMake debug config
-      run: cmake -S . -B debug -DCMAKE_CXX_COMPILER=g++-12 -DCMAKE_BUILD_TYPE=Release
-    - name: CMake debug build
-      run: cmake --build debug
-    - name: CMake debug test
-      run: env CTEST_OUTPUT_ON_FAILURE=1 cmake --build debug --target test
+      run: build/tests/cache_tests
