@@ -11,8 +11,8 @@ int main ()
 
     try
     {
-        get_positive_val_from_cin (&cache_capacity);
-        get_positive_val_from_cin (&num_elements);
+        get_positive_val_from_istream (&cache_capacity, std::cin);
+        get_positive_val_from_istream (&num_elements,   std::cin);
     }
     catch (const char* error_message)
     {
@@ -30,7 +30,7 @@ int main ()
     {
         try
         {
-            get_smth_from_cin (&key);
+            get_smth_from_istream (&key, std::cin);
         }
         catch (const char* error_message)
         {

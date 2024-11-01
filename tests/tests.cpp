@@ -16,10 +16,9 @@ size_t lfu_test (const std::string& filename)
     {
         throw std::runtime_error ("Failed to open file " + std::string (filename));
     }
-    auto original_buffer = std::cin.rdbuf (test_file.rdbuf());
 
     int cache_capacity = 0, number_pages = 0;
-    std::cin >> cache_capacity >> number_pages;
+    test_file >> cache_capacity >> number_pages;
 
     LFUCache<PageInfo> cache (cache_capacity);
     size_t num_hits = 0;
@@ -32,7 +31,7 @@ size_t lfu_test (const std::string& filename)
     {
         try
         {
-            get_smth_from_cin (&key);
+            get_smth_from_istream (&key, test_file);
         }
         catch (const char* error_message)
         {
@@ -43,8 +42,6 @@ size_t lfu_test (const std::string& filename)
         if (cache.lookup_update (key, slow_get_page))
             num_hits += 1;
     }
-
-    std::cin.rdbuf(original_buffer);
     return num_hits;
 }
 
@@ -55,10 +52,9 @@ size_t ideal_test (const std::string& filename)
     {
         throw std::runtime_error ("Failed to open file " + std::string (filename));
     }
-    auto original_buffer = std::cin.rdbuf (test_file.rdbuf());
 
     int cache_capacity = 0, number_pages = 0;
-    std::cin >> cache_capacity >> number_pages;
+    test_file >> cache_capacity >> number_pages;
 
     IdealCache<PageInfo> cache (cache_capacity);
     int key = 0;
@@ -69,7 +65,7 @@ size_t ideal_test (const std::string& filename)
     {
         try
         {
-            get_smth_from_cin (&key);
+            get_smth_from_istream (&key, test_file);
         }
         catch (const char* error_message)
         {
@@ -90,7 +86,6 @@ size_t ideal_test (const std::string& filename)
             num_hits += 1;
     }
 
-    std::cin.rdbuf(original_buffer);
     return num_hits;
 }
 
