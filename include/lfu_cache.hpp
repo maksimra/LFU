@@ -67,7 +67,7 @@ public:
 
     cache_node_it get_hash_value (KeyT key)
     {
-        return hash_[key];
+        return hash_.at (key);
     }
 
     bool element_exists (KeyT key)

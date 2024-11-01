@@ -62,7 +62,7 @@ public:
 
     PageT get_element (KeyT key)
     {
-        return hash_[key];
+        return hash_.at (key);
     }
 
     template <typename F>
