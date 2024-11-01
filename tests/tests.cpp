@@ -29,15 +29,7 @@ size_t lfu_test (const std::string& filename)
          page_number < number_pages;
          page_number++)
     {
-        try
-        {
-            get_smth_from_istream (&key, test_file);
-        }
-        catch (const char* error_message)
-        {
-            std::cerr << error_message;
-            return 0;
-        }
+        get_smth_from_istream (&key, test_file);
 
         if (cache.lookup_update (key, slow_get_page))
             num_hits += 1;
@@ -63,15 +55,7 @@ size_t ideal_test (const std::string& filename)
          element_num < number_pages;
          element_num++)
     {
-        try
-        {
-            get_smth_from_istream (&key, test_file);
-        }
-        catch (const char* error_message)
-        {
-            std::cerr << error_message;
-            return 0;
-        }
+        get_smth_from_istream (&key, test_file);
 
         cache.put_elem (element_num, key);
     }
@@ -157,6 +141,10 @@ TEST (EndToEndTests, CheckNumberHits)
 {
     size_t number_hits_lfu   = 0;
     size_t number_hits_ideal = 0;
+
+    size_t ref_answer_lfu   = 0;
+    size_t ref_answer_ideal = 0;
+
     const char* test_file_name = nullptr;
 
     for (int test_number = 1; test_number <= NUMBER_TESTS; ++test_number)
@@ -164,11 +152,14 @@ TEST (EndToEndTests, CheckNumberHits)
         std::cout << test_number << " Test:" << std::endl;
         std::string test_file_name = "tests/" + std::to_string (test_number) + "test.txt";
 
-        number_hits_lfu   = lfu_test   (test_file_name);
-        number_hits_ideal = ideal_test (test_file_name);
+        ASSERT_NO_THROW (number_hits_lfu   = lfu_test   (test_file_name));
+        ASSERT_NO_THROW (number_hits_ideal = ideal_test (test_file_name));
 
-        EXPECT_EQ (number_hits_lfu,   get_answer (test_number, "tests/lfu_answers.txt"));
-        EXPECT_EQ (number_hits_ideal, get_answer (test_number, "tests/ideal_answers.txt"));
+        ASSERT_NO_THROW (ref_answer_lfu   = get_answer (test_number, "tests/lfu_answers.txt"));
+        ASSERT_NO_THROW (ref_answer_ideal = get_answer (test_number, "tests/ideal_answers.txt"));
+
+        EXPECT_EQ (number_hits_lfu,   ref_answer_lfu);
+        EXPECT_EQ (number_hits_ideal, ref_answer_ideal);
 
         std::cout << "LFU:   number hits   = " << number_hits_lfu   << std::endl;
         std::cout << "Ideal: number hits   = " << number_hits_ideal << std::endl;

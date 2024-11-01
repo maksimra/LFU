@@ -13,43 +13,35 @@ int main ()
     {
         get_positive_val_from_istream (&cache_capacity, std::cin);
         get_positive_val_from_istream (&num_elements,   std::cin);
-    }
-    catch (const char* error_message)
-    {
-        std::cerr << error_message;
-        return 0;
-    }
 
-    IdealCache<PageInfo> cache (cache_capacity);
-    int key = 0;
+        IdealCache<PageInfo> cache (cache_capacity);
+        int key = 0;
 
-    for (int element_num = 0;
-         element_num < num_elements;
-         element_num++)
-    {
-        try
+        for (int element_num = 0;
+             element_num < num_elements;
+             element_num++)
         {
             get_smth_from_istream (&key, std::cin);
+            cache.put_elem (element_num, key);
         }
-        catch (const char* error_message)
+
+        size_t num_hits = 0;
+
+        for (int element_num = 0;
+             element_num < num_elements;
+             element_num++)
         {
-            std::cerr << error_message;
-            return 0;
+            if (cache.lookup_update (slow_get_page))
+                num_hits += 1;
         }
-
-        cache.put_elem (element_num, key);
+    
+        std::cout << num_hits << "\n";
     }
-
-    size_t num_hits = 0;
-
-    for (int element_num = 0;
-         element_num < num_elements;
-         element_num++)
+    catch (const std::runtime_error& error)
     {
-        if (cache.lookup_update (slow_get_page))
-            num_hits += 1;
+        std::cerr << error.what () << std::endl;
+        return EXIT_FAILURE;
     }
 
-    std::cout << num_hits << "\n";
     return 0;
 }

@@ -5,7 +5,7 @@ void get_smth_from_istream (T* smth, std::istream& input)
 {
     input >> *smth;
     if (!input.good ())
-        throw "Input error!\n";
+        throw std::runtime_error ("Input error!\n");
 }
 
 template <typename T, typename C = std::less<>>
