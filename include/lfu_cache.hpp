@@ -63,7 +63,13 @@ class LFUCache
     }
 
 public:
-    LFUCache (size_t cache_size): cache_sz_ (cache_size) {}
+    LFUCache (size_t cache_size)
+    {
+        if (cache_size <= 0)
+            throw std::runtime_error ("Incorrect capacity\n");
+
+        cache_sz_ = cache_size;
+    }
 
     cache_node_it get_hash_value (KeyT key) const
     {
