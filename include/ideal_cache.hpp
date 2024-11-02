@@ -56,10 +56,14 @@ private:
 
 public:
     template <typename Iterator>
-    IdealCache (size_t cache_size, Iterator begin, Iterator end): cache_sz_ (cache_size)
+    IdealCache (size_t cache_size, Iterator begin, Iterator end)
     {
-        size_t element_num = 0;
+        if (cache_size <= 0)
+            throw std::runtime_error ("Incorrect capacity\n");
 
+        cache_sz_ = cache_size;
+
+        size_t element_num = 0;
         for (auto iter = begin; iter != end; ++iter)
         {
             put_elem (element_num++, *iter);
@@ -68,7 +72,7 @@ public:
 
     using hash_it = typename std::unordered_map<KeyT, PageT>::iterator;
 
-    PageT get_element (KeyT key)
+    PageT get_element (KeyT key) const
     {
         return hash_.at (key);
     }

@@ -63,18 +63,24 @@ class LFUCache
     }
 
 public:
-    LFUCache (size_t cache_size): cache_sz_ (cache_size) {}
+    LFUCache (size_t cache_size)
+    {
+        if (cache_size <= 0)
+            throw std::runtime_error ("Incorrect capacity\n");
 
-    cache_node_it get_hash_value (KeyT key)
+        cache_sz_ = cache_size;
+    }
+
+    cache_node_it get_hash_value (KeyT key) const
     {
         return hash_.at (key);
     }
 
-    bool element_exists (KeyT key)
+    bool element_exists (KeyT key) const
     {
         if (hash_.find (key) != hash_.end ())
             return true;
-        return false; 
+        return false;
     }
 
     template <typename F>
