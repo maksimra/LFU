@@ -1,22 +1,22 @@
 #pragma once
 
 template <typename T>
-void get_smth_from_cin (T* smth)
+void get_smth_from_istream (T* smth, std::istream& input)
 {
-    std::cin >> *smth;
-    if (!std::cin.good ())
-        throw "Input error!\n";
+    input >> *smth;
+    if (!input.good ())
+        throw std::runtime_error ("Input error!\n");
 }
 
-template <typename T>
-void get_positive_val_from_cin (T* value)
+template <typename T, typename C = std::less<>>
+void get_positive_val_from_istream (T* value, std::istream& input, C cmp = C{})
 {
-    get_smth_from_cin (value);
+    get_smth_from_istream (value, input);
 
-    while (*value <= 0)
+    while (!cmp (0, *value))
     {
         std::cout << "You should enter positive number. Try again, please." << std::endl;
 
-        get_smth_from_cin (value);
+        get_smth_from_istream (value, input);
     }
 }

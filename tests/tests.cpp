@@ -16,10 +16,9 @@ size_t lfu_test (const std::string& filename)
     {
         throw std::runtime_error ("Failed to open file " + std::string (filename));
     }
-    auto original_buffer = std::cin.rdbuf (test_file.rdbuf());
 
     int cache_capacity = 0, number_pages = 0;
-    std::cin >> cache_capacity >> number_pages;
+    test_file >> cache_capacity >> number_pages;
 
     LFUCache<PageInfo> cache (cache_capacity);
     size_t num_hits = 0;
@@ -30,21 +29,11 @@ size_t lfu_test (const std::string& filename)
          page_number < number_pages;
          page_number++)
     {
-        try
-        {
-            get_smth_from_cin (&key);
-        }
-        catch (const char* error_message)
-        {
-            std::cerr << error_message;
-            return 0;
-        }
+        get_smth_from_istream (&key, test_file);
 
         if (cache.lookup_update (key, slow_get_page))
             num_hits += 1;
     }
-
-    std::cin.rdbuf(original_buffer);
     return num_hits;
 }
 
@@ -55,31 +44,23 @@ size_t ideal_test (const std::string& filename)
     {
         throw std::runtime_error ("Failed to open file " + std::string (filename));
     }
-    auto original_buffer = std::cin.rdbuf (test_file.rdbuf());
 
     int cache_capacity = 0, number_pages = 0;
-    std::cin >> cache_capacity >> number_pages;
+    test_file >> cache_capacity >> number_pages;
 
-    IdealCache<PageInfo> cache (cache_capacity);
+    std::list<int> key_list;
     int key = 0;
+
 
     for (int element_num = 0;
          element_num < number_pages;
          element_num++)
     {
-        try
-        {
-            get_smth_from_cin (&key);
-        }
-        catch (const char* error_message)
-        {
-            std::cerr << error_message;
-            return 0;
-        }
-
-        cache.put_elem (element_num, key);
+        get_smth_from_istream (&key, test_file);
+        key_list.push_back (key);
     }
 
+    IdealCache<PageInfo> cache (cache_capacity, key_list.begin (), key_list.end ());
     size_t num_hits = 0;
 
     for (int element_num = 0;
@@ -90,7 +71,6 @@ size_t ideal_test (const std::string& filename)
             num_hits += 1;
     }
 
-    std::cin.rdbuf(original_buffer);
     return num_hits;
 }
 
@@ -136,18 +116,6 @@ TEST (LfuUnitTest, CacheMiss)
     EXPECT_EQ (lfu_cache.element_exists (key), false);
 }
 
-TEST (IdealUnitTest, SetAndGet)
-{
-    IdealCache<PageInfo> ideal_cache (STANDART_CACHE_SIZE);
-    int key = 2005;
-
-    ideal_cache.put_elem (1, key);
-    ideal_cache.put_elem (2, key);
-
-    ideal_cache.lookup_update (slow_get_page);
-    EXPECT_EQ (ideal_cache.get_element (key).key, key);
-}
-
 TEST (LfuUnitTest, SetAndGet)
 {
     LFUCache<PageInfo> lfu_cache (STANDART_CACHE_SIZE);
@@ -162,6 +130,10 @@ TEST (EndToEndTests, CheckNumberHits)
 {
     size_t number_hits_lfu   = 0;
     size_t number_hits_ideal = 0;
+
+    size_t ref_answer_lfu   = 0;
+    size_t ref_answer_ideal = 0;
+
     const char* test_file_name = nullptr;
 
     for (int test_number = 1; test_number <= NUMBER_TESTS; ++test_number)
@@ -169,11 +141,14 @@ TEST (EndToEndTests, CheckNumberHits)
         std::cout << test_number << " Test:" << std::endl;
         std::string test_file_name = "tests/" + std::to_string (test_number) + "test.txt";
 
-        number_hits_lfu   = lfu_test   (test_file_name);
-        number_hits_ideal = ideal_test (test_file_name);
+        ASSERT_NO_THROW (number_hits_lfu   = lfu_test   (test_file_name));
+        ASSERT_NO_THROW (number_hits_ideal = ideal_test (test_file_name));
 
-        EXPECT_EQ (number_hits_lfu,   get_answer (test_number, "tests/lfu_answers.txt"));
-        EXPECT_EQ (number_hits_ideal, get_answer (test_number, "tests/ideal_answers.txt"));
+        ASSERT_NO_THROW (ref_answer_lfu   = get_answer (test_number, "tests/lfu_answers.txt"));
+        ASSERT_NO_THROW (ref_answer_ideal = get_answer (test_number, "tests/ideal_answers.txt"));
+
+        EXPECT_EQ (number_hits_lfu,   ref_answer_lfu);
+        EXPECT_EQ (number_hits_ideal, ref_answer_ideal);
 
         std::cout << "LFU:   number hits   = " << number_hits_lfu   << std::endl;
         std::cout << "Ideal: number hits   = " << number_hits_ideal << std::endl;

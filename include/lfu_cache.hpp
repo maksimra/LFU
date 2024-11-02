@@ -67,14 +67,14 @@ public:
 
     cache_node_it get_hash_value (KeyT key)
     {
-        return hash_[key];
+        return hash_.at (key);
     }
 
     bool element_exists (KeyT key)
     {
         if (hash_.find (key) != hash_.end ())
             return true;
-        return false; //
+        return false; 
     }
 
     template <typename F>
