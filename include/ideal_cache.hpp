@@ -68,7 +68,7 @@ public:
 
     using hash_it = typename std::unordered_map<KeyT, PageT>::iterator;
 
-    PageT get_element (KeyT key)
+    PageT get_element (KeyT key) const
     {
         return hash_.at (key);
     }
