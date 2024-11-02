@@ -14,7 +14,7 @@ int main ()
         get_positive_val_from_istream (&cache_capacity, std::cin);
         get_positive_val_from_istream (&num_elements,   std::cin);
 
-        IdealCache<PageInfo> cache (cache_capacity);
+        std::list<int> key_list;
         int key = 0;
 
         for (int element_num = 0;
@@ -22,9 +22,10 @@ int main ()
              element_num++)
         {
             get_smth_from_istream (&key, std::cin);
-            cache.put_elem (element_num, key);
+            key_list.push_back (key);
         }
 
+        IdealCache<PageInfo> cache (cache_capacity, key_list.begin (), key_list.end ());
         size_t num_hits = 0;
 
         for (int element_num = 0;
@@ -34,7 +35,7 @@ int main ()
             if (cache.lookup_update (slow_get_page))
                 num_hits += 1;
         }
-    
+
         std::cout << num_hits << "\n";
     }
     catch (const std::runtime_error& error)

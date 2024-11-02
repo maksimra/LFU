@@ -8,6 +8,7 @@
 template <typename PageT, typename KeyT = int>
 class IdealCache
 {
+private:
     size_t cache_sz_;
     std::unordered_map<KeyT, PageT> hash_;
     std::list<KeyT> key_list;
@@ -47,18 +48,25 @@ class IdealCache
         return (hash_.size () >= cache_sz_);
     }
 
-
-public:
-
-    IdealCache (size_t cache_size): cache_sz_ (cache_size) {}
-
-    using hash_it = typename std::unordered_map<KeyT, PageT>::iterator;
-
     void put_elem (size_t element_num, KeyT key)
     {
         key_list.push_back (key);
         sequency_map[key].push_back (element_num);
     }
+
+public:
+    template <typename Iterator>
+    IdealCache (size_t cache_size, Iterator begin, Iterator end): cache_sz_ (cache_size)
+    {
+        size_t element_num = 0;
+
+        for (auto iter = begin; iter != end; ++iter)
+        {
+            put_elem (element_num++, *iter);
+        }
+    }
+
+    using hash_it = typename std::unordered_map<KeyT, PageT>::iterator;
 
     PageT get_element (KeyT key)
     {

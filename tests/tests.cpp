@@ -48,18 +48,19 @@ size_t ideal_test (const std::string& filename)
     int cache_capacity = 0, number_pages = 0;
     test_file >> cache_capacity >> number_pages;
 
-    IdealCache<PageInfo> cache (cache_capacity);
+    std::list<int> key_list;
     int key = 0;
+
 
     for (int element_num = 0;
          element_num < number_pages;
          element_num++)
     {
         get_smth_from_istream (&key, test_file);
-
-        cache.put_elem (element_num, key);
+        key_list.push_back (key);
     }
 
+    IdealCache<PageInfo> cache (cache_capacity, key_list.begin (), key_list.end ());
     size_t num_hits = 0;
 
     for (int element_num = 0;
@@ -113,18 +114,6 @@ TEST (LfuUnitTest, CacheMiss)
     int key = 1999;
 
     EXPECT_EQ (lfu_cache.element_exists (key), false);
-}
-
-TEST (IdealUnitTest, SetAndGet)
-{
-    IdealCache<PageInfo> ideal_cache (STANDART_CACHE_SIZE);
-    int key = 2005;
-
-    ideal_cache.put_elem (1, key);
-    ideal_cache.put_elem (2, key);
-
-    ideal_cache.lookup_update (slow_get_page);
-    EXPECT_EQ (ideal_cache.get_element (key).key, key);
 }
 
 TEST (LfuUnitTest, SetAndGet)
