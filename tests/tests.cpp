@@ -9,14 +9,8 @@
 const size_t STANDART_CACHE_SIZE = 6;
 const int    NUMBER_TESTS = 10;
 
-size_t lfu_test (const std::string& filename)
+size_t lfu_test (std::fstream& test_file)
 {
-    std::fstream test_file (filename);
-    if (!test_file.is_open ())
-    {
-        throw std::runtime_error ("Failed to open file " + std::string (filename));
-    }
-
     int cache_capacity = 0, number_pages = 0;
     test_file >> cache_capacity >> number_pages;
 
@@ -37,14 +31,8 @@ size_t lfu_test (const std::string& filename)
     return num_hits;
 }
 
-size_t ideal_test (const std::string& filename)
+size_t ideal_test (std::fstream& test_file)
 {
-    std::fstream test_file (filename);
-    if (!test_file.is_open ())
-    {
-        throw std::runtime_error ("Failed to open file " + std::string (filename));
-    }
-
     int cache_capacity = 0, number_pages = 0;
     test_file >> cache_capacity >> number_pages;
 
@@ -141,8 +129,17 @@ TEST (EndToEndTests, CheckNumberHits)
         std::cout << test_number << " Test:" << std::endl;
         std::string test_file_name = "tests/" + std::to_string (test_number) + "test.txt";
 
-        ASSERT_NO_THROW (number_hits_lfu   = lfu_test   (test_file_name));
-        ASSERT_NO_THROW (number_hits_ideal = ideal_test (test_file_name));
+        std::fstream test_file (test_file_name);
+        if (!test_file.is_open ())
+        {
+            throw std::runtime_error ("Failed to open file " + std::string (test_file_name));
+        }
+
+        ASSERT_NO_THROW (number_hits_lfu   = lfu_test   (test_file));
+        test_file.seekg (0, std::ios::beg);
+        ASSERT_NO_THROW (number_hits_ideal = ideal_test (test_file));
+
+        test_file.close ();
 
         ASSERT_NO_THROW (ref_answer_lfu   = get_answer (test_number, "tests/lfu_answers.txt"));
         ASSERT_NO_THROW (ref_answer_ideal = get_answer (test_number, "tests/ideal_answers.txt"));
