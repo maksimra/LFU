@@ -23,6 +23,9 @@ Theoretical use: It sets an upper bound for the performance of real-world cache 
 ```
 cmake -DCMAKE_BUILD_TYPE=Release -S . -B build
 ```
+```
+cmake --build build
+```
 2) To run the project:
 
 *LFU Cache*
